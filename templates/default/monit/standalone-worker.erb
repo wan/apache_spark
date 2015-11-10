@@ -1,0 +1,9 @@
+check process "<%= @service_name %>"
+  matching "^.*java.* (org\\.apache\\.)?spark\\.deploy\\.worker\\.Worker "
+    every 1 cycles
+
+    start program "/bin/bash -c '<%= @install_dir %>/sbin/start-slave.sh <%= @master_host %>'"
+    as uid <%= @user %> as gid <%= @group %> 
+
+  stop program "/bin/bash -c '<%= @install_dir %>/sbin/stop-slave.sh'"
+    as uid <%= @user %> as gid <%= @group %>

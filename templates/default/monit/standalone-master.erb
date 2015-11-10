@@ -1,0 +1,9 @@
+check process "<%= @service_name %>"
+  matching "^.*java.* (org\\.apache\\.)?spark\\.deploy\\.master\\.Master "
+    every 1 cycles
+
+    start program "/bin/bash -c '<%= @install_dir %>/sbin/start-master.sh'"
+    as uid <%= @user %> as gid <%= @group %> 
+
+  stop program "/bin/bash -c '<%= @install_dir %>/sbin/stop-master.sh'"
+    as uid <%= @user %> as gid <%= @group %>

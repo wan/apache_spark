@@ -15,21 +15,8 @@
 include_recipe 'apache_spark::spark-install'
 include_recipe 'monit_wrapper'
 
-worker_runner_script = ::File.join(node['apache_spark']['install_dir'], 'worker_runner.sh')
-
 spark_user = node['apache_spark']['user']
 spark_group = node['apache_spark']['group']
-
-template worker_runner_script do
-  source 'spark_worker_runner.sh.erb'
-  mode 0744
-  owner spark_user
-  group spark_group
-  variables node['apache_spark']['standalone'].merge(
-    install_dir: node['apache_spark']['install_dir'],
-    user: spark_user
-  )
-end
 
 directory node['apache_spark']['standalone']['worker_work_dir'] do
   mode 0755
@@ -75,15 +62,16 @@ master_host_port = format(
   node['apache_spark']['standalone']['master_port'].to_i
 )
 
+#template "/etc/monit/conf.d/#{service_name}" do
 monit_wrapper_monitor service_name do
-  template_source 'pattern-based_service.conf.erb'
-  template_cookbook 'monit_wrapper'
+  template_cookbook 'apache_spark'
+  template_source 'monit/standalone-worker.erb'
   wait_for_host_port master_host_port
-  variables \
-    cmd_line_pattern: 'java.* org\.apache\.spark\.deploy\.worker\.Worker ',
-    cmd_line: worker_runner_script,
-    user: 'root',  # The worker needs to run as root initially to use ulimit.
-    group: 'root'
+  variables service_name: service_name,
+    install_dir: node['apache_spark']['install_dir'],
+    master_host: master_host_port,
+    user: spark_user,
+    group: spark_group
 end
 
 monit_wrapper_service service_name do
@@ -97,7 +85,6 @@ monit_wrapper_service service_name do
   # TODO: put this logic in a library method in monit_wrapper.
   notification_action = monit_service_exists_and_running?(service_name) ? :restart : :start
 
-  subscribes notification_action, "monit-wrapper_monitor[#{service_name}]", :delayed
+  subscribes notification_action, "monit_wrapper_monitor[#{service_name}]", :delayed
   subscribes notification_action, "package[#{node['apache_spark']['pkg_name']}]", :delayed
-  subscribes notification_action, "template[#{worker_runner_script}]", :delayed
 end

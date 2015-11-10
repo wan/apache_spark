@@ -15,29 +15,16 @@
 include_recipe 'apache_spark::spark-install'
 include_recipe 'monit_wrapper'
 
-master_runner_script = ::File.join(node['apache_spark']['install_dir'], 'bin', 'master_runner.sh')
-
 spark_user = node['apache_spark']['user']
 spark_group = node['apache_spark']['group']
-
-template master_runner_script do
-  source 'spark_master_runner.sh.erb'
-  mode 0744
-  owner spark_user
-  group spark_group
-  variables node['apache_spark']['standalone'].merge(
-    install_dir: node['apache_spark']['install_dir']
-  )
-end
 
 # Run Spark standalone master with Monit
 service_name = 'spark-standalone-master'
 monit_wrapper_monitor service_name do
-  template_source 'pattern-based_service.conf.erb'
-  template_cookbook 'monit_wrapper'
-  variables \
-    cmd_line_pattern: '^java.* (org\.apache\.)?spark\.deploy\.master\.Master ',
-    cmd_line: master_runner_script,
+  template_cookbook 'apache_spark'
+  template_source 'monit/standalone-master.erb'
+  variables service_name: service_name,
+    install_dir: node['apache_spark']['install_dir'],
     user: spark_user,
     group: spark_group
 end
@@ -52,7 +39,6 @@ monit_wrapper_service service_name do
   # TODO: put this logic in a library method in monit_wrapper.
   notification_action = monit_service_exists_and_running?(service_name) ? :restart : :start
 
-  subscribes notification_action, "monit-wrapper_monitor[#{service_name}]", :delayed
+  subscribes notification_action, "monit_wrapper_monitor[#{service_name}]", :delayed
   subscribes notification_action, "package[#{node['apache_spark']['pkg_name']}]", :delayed
-  subscribes notification_action, "template[#{master_runner_script}]", :delayed
 end
