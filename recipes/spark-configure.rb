@@ -24,8 +24,6 @@ end
 common_extra_classpath_items_str =
   node['apache_spark']['standalone']['common_extra_classpath_items'].join(':')
 
-default_executor_mem_mb = node['apache_spark']['standalone']['default_executor_mem_mb']
-
 template "#{spark_conf_dir}/spark-defaults.conf" do
   source 'spark-defaults.conf.erb'
   mode 0644
@@ -34,7 +32,6 @@ template "#{spark_conf_dir}/spark-defaults.conf" do
   variables options: node['apache_spark']['conf'].to_hash.merge(
     'spark.driver.extraClassPath' => common_extra_classpath_items_str,
     'spark.executor.extraClassPath' => common_extra_classpath_items_str,
-    'spark.executor.memory' => "#{default_executor_mem_mb}m",
     'spark.local.dir' => local_dirs.join(',')
   )
 end

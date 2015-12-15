@@ -18,7 +18,7 @@ when 'debian', 'ubuntu'
     command 'apt-get update'
     action :nothing
   end.run_action(:run)
-when 'redhat', 'centos', 'fedora'
+when 'amazon', 'redhat', 'centos', 'fedora'
   execute 'apt-get update' do
     command <<-EOT
       yum check-update
