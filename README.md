@@ -75,8 +75,6 @@ The following platforms are not tested but will probably work (tests coming soon
 * `node['apache_spark']['standalone']['worker_memory_mb']`: the amount of memory in MB to allocate
   to each worker (i.e. the maximum total memory used by different applications' executors running
   on a worker node).
-* `node['apache_spark']['standalone']['default_executor_mem_mb']`: the default amount of memory
-  to be allocated to a Spark application's executor on each node.
 * `node['apache_spark']['standalone']['log_dir']`: the log directory for Spark masters and workers.
 * `node['apache_spark']['standalone']['daemon_root_logger']`: the `spark.root.logger` property
   is set to this.

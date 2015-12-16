@@ -59,9 +59,6 @@ default['apache_spark']['standalone']['worker_work_dir'] = '/var/spark-standalon
 # Total memory a worker will report as available, MBs.
 default['apache_spark']['standalone']['worker_memory_mb'] = 1024
 
-# Default amount of memory allocated for a Sparky application per executor.
-default['apache_spark']['standalone']['default_executor_mem_mb'] = 256
-
 default['apache_spark']['standalone']['log_dir'] = '/var/log/spark-standalone'
 default['apache_spark']['standalone']['daemon_root_logger'] = 'INFO,DRFA'
 default['apache_spark']['standalone']['max_num_open_files'] = '65536'
@@ -89,5 +86,7 @@ default['apache_spark']['conf']['spark.akka.frameSize'] = 100
 # Uniformly spread the load across all Spark worker nodes.
 default['apache_spark']['conf']['spark.deploy.spreadOut'] = true
 default['apache_spark']['conf']['spark.executor.extraLibraryPath'] = '/usr/lib/hadoop/lib/native'
+# Default amount of memory allocated for a Sparky application per executor.
+default['apache_spark']['conf']['spark.executor.memory'] = 256
 
 default['apache_spark']['standalone']['local_dirs'] = ['/var/local/spark']
